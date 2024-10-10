@@ -82,3 +82,22 @@ def plot_windowed_ts_and_rqa(numerical_data, recurrence_matrix, rqa_metrics, sav
     if save_image:
         plt.savefig(file_path)
     plt.show()
+
+def plot_rqa_multi_radii(recurrence_matrices, rqa_metrics_list, radii, save_image, file_path):
+    # Create a plot with multiple recurrence plots for different radii
+    fig, axes = plt.subplots(1, len(recurrence_matrices), figsize=(15, 5))
+
+    for i, (recurrence_matrix, rqa_metrics, radius) in enumerate(zip(recurrence_matrices, rqa_metrics_list, radii)):
+        # Plot recurrence plot
+        axes[i].imshow(recurrence_matrix, cmap='Blues', origin='lower')
+        axes[i].set_title(f'Recurrence Plot (Radius={radius})')
+
+        # Display RQA metrics in the panel
+        metrics_text = "\n".join([f"{key}: {value:.3f}" for key, value in rqa_metrics.items()])
+        axes[i].text(0.1, -0.1, metrics_text, fontsize=8, verticalalignment='top', transform=axes[i].transAxes)
+
+    # Adjust layout and save/show the plot
+    plt.tight_layout()
+    if save_image:
+        plt.savefig(file_path)
+    plt.show()
