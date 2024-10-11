@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
 
 # Set global figure size to enforce smaller plots
 plt.rcParams['figure.figsize'] = (12, 5)
@@ -98,6 +99,45 @@ def plot_rqa_multi_radii(recurrence_matrices, rqa_metrics_list, radii, save_imag
 
     # Adjust layout and save/show the plot
     plt.tight_layout()
+    if save_image:
+        plt.savefig(file_path)
+    plt.show()
+
+def plot_ts_and_crqa(ts_a, ts_b, recurrence_matrix, rqa_metrics, save_image, file_path):
+    # Create a custom layout with GridSpec
+    fig = plt.figure(figsize=(15, 6))
+    spec = GridSpec(2, 3, figure=fig, width_ratios=[1, 1, 0.5], height_ratios=[1, 1], hspace=0.4)
+
+    # Plot time series A
+    ax_ts_a = fig.add_subplot(spec[0, 0])
+    ax_ts_a.plot(range(len(ts_a)), ts_a, color='blue', linewidth=0.5)
+    ax_ts_a.set_title('Time Series A')
+    ax_ts_a.set_xlabel('Time')
+    ax_ts_a.set_ylabel('Value')
+
+    # Plot time series B
+    ax_ts_b = fig.add_subplot(spec[1, 0])
+    ax_ts_b.plot(range(len(ts_b)), ts_b, color='green', linewidth=0.5)
+    ax_ts_b.set_title('Time Series B')
+    ax_ts_b.set_xlabel('Time')
+    ax_ts_b.set_ylabel('Value')
+
+    # Plot recurrence plot for CRQA
+    ax_rqa = fig.add_subplot(spec[:, 1])
+    ax_rqa.imshow(recurrence_matrix, cmap='Blues', origin='lower')
+    ax_rqa.set_title('CRQA Recurrence Plot')
+
+    # Display RQA metrics in the third panel
+    ax_metrics = fig.add_subplot(spec[:, 2])
+    if rqa_metrics:
+        metrics_text = "\n".join([f"{key}: {value:.3f}" for key, value in rqa_metrics.items()])
+    else:
+        metrics_text = "No metrics available"
+    ax_metrics.text(0.1, 0.5, metrics_text, fontsize=10, verticalalignment='center', transform=ax_metrics.transAxes)
+    ax_metrics.axis('off')
+    ax_metrics.set_title('CRQA Metrics')
+
+    # Save and/or show the plot
     if save_image:
         plt.savefig(file_path)
     plt.show()

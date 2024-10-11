@@ -66,10 +66,11 @@ def perform_rqa(data, delay=15, embedding_dimension=3, radius=0.2, minLine=2, ge
         return rqa_results
 
 
+# Function to perform CRQA
 def perform_crqa(data, delay=15, embedding_dimension=3, radius=0.2, minLine=2, getRP=True):
     """
     Perform Cross Recurrence Quantification Analysis (CRQA) and optionally compute Cross Recurrence Plots (CRP) 
-    on the provided data. Perform CRQA for each pair of columns in the input data.
+    on the provided data.
 
     Parameters:
     data (pd.DataFrame): The input data with time series to be analyzed.
@@ -83,51 +84,33 @@ def perform_crqa(data, delay=15, embedding_dimension=3, radius=0.2, minLine=2, g
     dict: A dictionary containing CRQA results for each pair of columns.
     dict (optional): A dictionary containing CRP results for each pair of columns, if getRP is True.
     """
-    crqa_results = {}  # Dictionary to store CRQA results
-    crp_results = {}  # Dictionary to store CRP results (if getRP is True)
+    crqa_results = {}
+    crp_results = {}
 
-    columns = data.columns.tolist()
+    time_series1 = TimeSeries(data.iloc[:, 0], embedding_dimension=embedding_dimension, time_delay=delay)
+    time_series2 = TimeSeries(data.iloc[:, 1], embedding_dimension=embedding_dimension, time_delay=delay)
 
-    # Iterate over all pairs of columns to complete pairwise CRQA
-    # iterate j from i+2 to len(columns) so x->y is not computed.
-    for i in range(len(columns)):
-        for j in range(i + 2, len(columns)):
-            if columns[i].split('_')[-1] == columns[j].split('_')[-1]:
+    settings = Settings(
+        (time_series1, time_series2),
+        analysis_type=Cross,
+        neighbourhood=FixedRadius(radius),
+        similarity_measure=EuclideanMetric
+    )
 
-                # Get the current pair of columns
-                column1, column2 = columns[i], columns[j]
-                
-                # Create time series objects for the current pair of columns
-                time_series1 = TimeSeries(data[column1], embedding_dimension=embedding_dimension, time_delay=delay)
-                time_series2 = TimeSeries(data[column2], embedding_dimension=embedding_dimension, time_delay=delay)
+    computation = RQAComputation.create(settings)
+    result = computation.run()
 
-                # Set up the settings for CRQA computation
-                settings = Settings(
-                    (time_series1,time_series2),
-                    analysis_type=Cross,
-                    neighbourhood=FixedRadius(radius),
-                    similarity_measure=EuclideanMetric
-                )
-                
-                # Perform CRQA computation
-                computation = RQAComputation.create(settings)
-                result = computation.run()
-                
-                # Set minimum line lengths for CRQA measures
-                result.min_diagonal_line_length = minLine
-                result.min_vertical_line_length = minLine
-                result.min_white_vertical_line_length = minLine
-                
-                # Store the CRQA result
-                crqa_results[f'{column1}_{column2}'] = result
-                
-                # Optionally compute the Cross Recurrence Plot
-                if getRP:
-                    crp_computation = RPComputation.create(settings)
-                    crp_result = crp_computation.run()
-                    crp_results[f'{column1}_{column2}'] = crp_result
-    
-    # Return the results
+    result.min_diagonal_line_length = minLine
+    result.min_vertical_line_length = minLine
+    result.min_white_vertical_line_length = minLine
+
+    crqa_results['0_1'] = result
+
+    if getRP:
+        crp_computation = RPComputation.create(settings)
+        crp_result = crp_computation.run()
+        crp_results['0_1'] = crp_result
+
     if getRP:
         return crqa_results, crp_results
     else:
