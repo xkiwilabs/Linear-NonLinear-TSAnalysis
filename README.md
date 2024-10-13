@@ -13,6 +13,8 @@ Macpherson, C., Richardson, M., & Kallen, R. W. (2024). Advanced quantitative ap
 - **Margaret C. Macpherson** (GitHub: [cathymacpherson](https://github.com/cathymacpherson))
 - **Michael J. Richardson** (GitHub: [xkiwilabs](https://github.com/xkiwilabs))
 
+---
+
 ### Set-up Information
 
 Follow these steps to set up the environment for this tutorial:
@@ -60,6 +62,8 @@ Follow these steps to set up the environment for this tutorial:
      pip install -r requirements.txt
      ```
 
+--- 
+
 ### Content Overview
 
 The tutorial is divided into the following sections:
@@ -67,10 +71,12 @@ The tutorial is divided into the following sections:
 1. [**Categorical Recurrence Quantification Analysis (catRQA)**](rqaCategorical.ipynb): Learn about RQA for categorical data and its application in understanding the dynamics of categorical events.
 2. [**Continuous Recurrence Quantification Analysis (contRQA)**](rqaContinuous.ipynb) Apply RQA to continuous time series data, providing insights into the temporal structure of continuous data.
 3. [**Cross Recurrence Quantification Analysis (CRQA)**](crqaContinuous.ipynb): Explore coordinated behaviour between two time series.
-4. [**Windowed RQA**](rqaWindowed.ipynb): Understand how to apply RQA in a windowed manner to observe temporal changes in recurrence over time.
-5. **False Nearest Neighbours (FNN) and Average Mutual Information (AMI)**: Learn how to determine the appropriate hyperparameters for RQA.
-6. **Detrended Fluctuation Analysis (DFA)**: Learn about DFA, a method used to detect long-term statistical dependencies in time series data. DFA is particularly useful for analysing non-stationary processes where traditional methods may not apply.
-7. **Windowed DFA**: Understand how to apply DFA in a windowed manner to assess how patterns of variability evolve over time.
-8. **Linear Metrics**: Examine the use of linear metrics to analyse and summarise time series characteristics.
+4. **Multidimensional Recurrence Quantification Analysis (mdRQA)**: Learn how to apply RQA to multivariate data.
+5. [**Windowed RQA**](rqaWindowed.ipynb): Understand how to apply RQA in a windowed manner to observe temporal changes in recurrence over time.
+6. **False Nearest Neighbours (FNN) and Average Mutual Information (AMI)**: Learn how to determine the appropriate hyperparameters for RQA.
+7. [**Detrended Fluctuation Analysis (DFA)**](dfaAnalysis.ipynb): Learn about DFA, a method used to detect long-term statistical dependencies in time series data. DFA is particularly useful for analysing non-stationary processes where traditional methods may not apply.
+8. **Windowed DFA**: Understand how to apply DFA in a windowed manner to assess how patterns of variability evolve over time.
+9. **Complexity Matching**: Learn about various methods for capturing the alignment of variability across time series, also known as complexity matching. 
+10. **Linear Metrics**: Examine the use of linear metrics to analyse and summarise time series characteristics.
 
 We hope this tutorial serves as a helpful resource for delving into the world of using time series analysis in social and behavioural research. 

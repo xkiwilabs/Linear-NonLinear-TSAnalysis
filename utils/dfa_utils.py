@@ -14,6 +14,7 @@ def perform_nolds_dfa(data):
 # Custom DFA function
 def dfa(data, min_window_size=8):
     N = len(data)
+    data = np.cumsum(data - np.mean(data))    #integrate data
     flucts = []
     scales = np.logspace(np.log10(min_window_size), np.log10(N//4), num=16, dtype=int)
     scales = np.unique(scales)  # Remove duplicate scales
@@ -34,19 +35,14 @@ def dfa(data, min_window_size=8):
     fit_line = np.polyval(coeffs, np.log(scales))
     return alpha, scales, flucts, fit_line
 
-# Function to perform DFA
 def perform_dfa_for_plotting(data, min_window_size=8):
-    dfa_results = {}
-    for column in data.columns:
-        data.loc[:, column] = (data[column] - data[column].mean()) / data[column].std()
-        alpha, scales, flucts, fit_line = dfa(data[column], min_window_size)
-        dfa_results[column] = {'alpha': alpha, 'scales': scales, 'flucts': flucts, 'fit_line': fit_line}
-    return dfa_results
+    column = data.columns[0]
+    data[column] = (data[column] - data[column].mean()) / data[column].std()
+    alpha, scales, flucts, fit_line = dfa(data[column], min_window_size)
+    return {column: {'alpha': alpha, 'scales': scales, 'flucts': flucts, 'fit_line': fit_line}}
 
 def perform_dfa(data, min_window_size=8):
-    dfa_results = {}
-    for column in data.columns:
-        data.loc[:, column] = (data[column] - data[column].mean()) / data[column].std()
-        alpha, scales, flucts, fit_line = dfa(data[column], min_window_size)
-        dfa_results[column] = alpha  # Only store alpha for simplicity
-    return dfa_results
+    column = data.columns[0]
+    data[column] = (data[column] - data[column].mean()) / data[column].std()
+    alpha, scales, flucts, fit_line = dfa(data[column], min_window_size)
+    return {column: alpha}  # Only store alpha for simplicity
