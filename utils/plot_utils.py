@@ -79,3 +79,23 @@ def plot_ts_and_dfa(numerical_data, scales, flucts, fit_line, alpha, save_image,
     if save_image:
         plt.savefig(file_path)
     plt.show()
+
+def plot_cm_cross_cor(cross_corr_values, save_image, file_path):
+    # Create a box plot comparing cond 0 and cond 1 at lag 0
+    plt.figure(figsize=(10, 6))
+    plt.boxplot([cross_corr_values['cond_0'], cross_corr_values['cond_1']], labels=['Condition 0', 'Condition 1'])
+    plt.title('Cross-correlation at Lag 0: Condition 0 vs Condition 1')
+    plt.ylabel('Cross-correlation values')
+    plt.xlabel('Condition')
+    plt.grid(True)
+
+    # Calculate and add average cross-correlation value for each condition
+    mean_cond_0 = np.mean(cross_corr_values['cond_0'])
+    mean_cond_1 = np.mean(cross_corr_values['cond_1'])
+    plt.text(1, mean_cond_0, f'Mean: {mean_cond_0:.2f}', horizontalalignment='center', verticalalignment='bottom', fontsize=10, color='blue')
+    plt.text(2, mean_cond_1, f'Mean: {mean_cond_1:.2f}', horizontalalignment='center', verticalalignment='bottom', fontsize=10, color='blue')
+
+    # Save or show the plot
+    if save_image:
+        plt.savefig(file_path)
+    plt.show()

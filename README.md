@@ -75,8 +75,8 @@ The tutorial is divided into the following sections:
 5. [**Windowed RQA**](rqaWindowed.ipynb): Understand how to apply RQA in a windowed manner to observe temporal changes in recurrence over time.
 6. **False Nearest Neighbours (FNN) and Average Mutual Information (AMI)**: Learn how to determine the appropriate hyperparameters for RQA.
 7. [**Detrended Fluctuation Analysis (DFA)**](dfaAnalysis.ipynb): Learn about DFA, a method used to detect long-term statistical dependencies in time series data. DFA is particularly useful for analysing non-stationary processes where traditional methods may not apply.
-8. **Windowed DFA**: Understand how to apply DFA in a windowed manner to assess how patterns of variability evolve over time.
-9. **Complexity Matching**: Learn about various methods for capturing the alignment of variability across time series, also known as complexity matching. 
+8. [**Windowed DFA**](dfaWindowed.ipynb): Understand how to apply DFA in a windowed manner to assess how patterns of variability evolve over time.
+9. [**Complexity Matching**](complexityMatching.ipynb): Learn about various methods for capturing the alignment of variability across time series, also known as complexity matching. 
 10. **Linear Metrics**: Examine the use of linear metrics to analyse and summarise time series characteristics.
 
 We hope this tutorial serves as a helpful resource for delving into the world of using time series analysis in social and behavioural research. 
