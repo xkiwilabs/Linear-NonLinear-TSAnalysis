@@ -17,50 +17,15 @@ Macpherson, C., Richardson, M., & Kallen, R. W. (2024). Advanced quantitative ap
 
 ### Set-up Information
 
-Follow these steps to set up the environment for this tutorial:
-
-1. **Download VS Code**
-
-   - Download and install Visual Studio Code (VS Code) from [https://code.visualstudio.com/](https://code.visualstudio.com/).
-   - VS Code is a recommended editor for working with this tutorial, offering a wide range of extensions and features that simplify Python development.
-   - To work with Jupyter notebooks in VS Code, install the "Jupyter" extension from the Extensions Marketplace.
-
-2. **Clone the GitHub Repository**
-
-   - Open a terminal and navigate to the folder where you want to clone the repository.
-   - Clone the repository using the following command:
-     ```sh
-     git clone https://github.com/xkiwilabs/Linear-NonLinear-TSAnalysis.git
-     ```
-
-3. **Create and Activate a Virtual Environment**
-
-   - Open a terminal and navigate to the folder where you want to store your virtual environment.
-   - Create a virtual environment using the following command:
-     ```sh
-     python -m venv env_name
-     ```
-   - Activate the virtual environment:
-     - For Miniconda/Conda users:
+- For novice users: 
+  - Refer to the [set up instructions](SETUP.md) for full details regarding how to set up the environment for this tutorial.
+- For users familiar with python and Visual Studio Code: 
+  - [VS Code](https://code.visualstudio.com/) is the recommended editor for this tutorial. To work with Jupyter notebooks in VS Code, ensure that the "Jupyter" extension has been installed.
+  - The GitHub Repository can be cloned from here: https://github.com/xkiwilabs/Linear-NonLinear-TSAnalysis.git
+  - To install the required dependencies, use:
        ```sh
-       conda create --name env_name python=3.9
-       conda activate env_name
-       ```
-     - On Windows:
-       ```sh
-       .\env_name\Scripts\activate
-       ```
-     - On macOS/Linux:
-       ```sh
-       source env_name/bin/activate
-       ```
-
-4. **Install Dependencies**
-
-   - Once the virtual environment is activated, install the required dependencies using the provided requirements file:
-     ```sh
      pip install -r requirements.txt
-     ```
+    ```
 
 --- 
 
