@@ -30,7 +30,7 @@ def irp(x1, x2):
     
     # Circular statistics
     meanRP = circmean(radians)
-    rvRP = 1-np.abs(np.mean(np.exp(1j * radians)))
+    rvRP = np.abs(np.mean(np.exp(1j * radians)))
     sdRP = circstd(radians)
     
     return meanRP, sdRP, rvRP, radians
@@ -70,7 +70,7 @@ def drp(x1, x2, samplerate, DistFLT=0.5, AmpFLT=0.3):
     
     # Circular statistics
     meanRP = circmean(radians)
-    rvRP = 1-np.abs(np.mean(np.exp(1j * radians)))
+    rvRP = np.abs(np.mean(np.exp(1j * radians)))
     sdRP = circstd(radians)
     
     return meanRP, sdRP, rvRP, radians, peaks
@@ -79,7 +79,7 @@ def drp(x1, x2, samplerate, DistFLT=0.5, AmpFLT=0.3):
 import numpy as np
 import matplotlib.pyplot as plt
 
-def plot_irp(radians, samplerate, centre=0):
+def plot_irp(radians, samplerate):
     """
     Plot relative phase in radians over time, ensuring the phase is centered around 0 (-2π to +2π).
     
@@ -90,40 +90,29 @@ def plot_irp(radians, samplerate, centre=0):
     """
     # Generate time points
     time = np.arange(0, len(radians) / samplerate, 1 / samplerate)
-
-    # Unwrap the phase to remove discontinuities
-    radians = np.unwrap(radians)
-
-    # Rescale the phase to ensure it fluctuates around 0 (in range -2π to +2π)
-    if centre == 0:
-        radians = np.mod(radians + 2 * np.pi, 4 * np.pi) - 2 * np.pi  # Force range to be -2π to 2π
         
     plt.figure()
     plt.plot(time, radians, label='Relative Phase')
-    plt.axhline(y=2 * np.pi, color='r', linestyle='--', label='2π')
-    plt.axhline(y=-2 * np.pi, color='r', linestyle='--', label='-2π')
     plt.xlabel('Time (s)')
     plt.ylabel('Phase (radians)')
-    plt.title('Instantaneous Relative Phase (Centered -2π to +2π)')
+    plt.title('Instantaneous Relative Phase')
     plt.grid(True)
     plt.legend()
     plt.show()
 
 
-def plot_drp(radians, time_peaks, centre=0):
+def plot_drp(radians, peaks, samplerate):
     """
     Plot discrete relative phase at peak locations.
     
     Args:
-        time_peaks (array): Time points of peaks.
         radians (array): Relative phase in radians at peaks.
+        peaks (array): Indices of the peaks in the time series.
+        samplerate (int): Sampling rate.
     """
-
-    # Centre around 0
-    # Ensure the phase is centered between -π and π
-    if centre == 0: 
-        radians = np.mod(radians + np.pi, 2 * np.pi) - np.pi
-
+    # Convert peak indices to time values
+    time_peaks = peaks / samplerate
+    
     plt.figure()
     plt.plot(time_peaks, radians, 'o', label='Discrete Relative Phase')
     plt.xlabel('Time (s)')
@@ -152,6 +141,10 @@ def plot_rp_distribution(radians, bins=30, centre=0):
     plt.xlabel('Phase (radians)')
     plt.ylabel('Count')
     plt.title('Relative Phase Distribution')
+    if centre == 0:
+        plt.xticks(np.arange(-np.pi, np.pi + 1, np.pi))
+    else:
+        plt.xticks(np.arange(0, 2*np.pi + 1, np.pi))
     plt.grid(True)
     plt.show()
 
@@ -166,8 +159,8 @@ def return_plot(x1, x2, samplerate):
         samplerate (int): Sampling rate.
     """
     # Get discrete relative phase for x1 and x2
-    meanRP1, sdRP1, rvRP1, radians1 = discretephase(x1, x2, samplerate)
-    meanRP2, sdRP2, rvRP2, radians2 = discretephase(x2, x1, samplerate)
+    _, _, _, radians1, _ = drp(x1, x2, samplerate)
+    _, _, _, radians2, _ = drp(x2, x1, samplerate)
     
     # Plot return plot
     plt.figure()
@@ -175,6 +168,8 @@ def return_plot(x1, x2, samplerate):
     plt.scatter(radians2[:-1], radians2[1:], color='blue', label='x2:x1')
     plt.xlabel('Relative Phase (t)')
     plt.ylabel('Relative Phase (t+1)')
+    plt.xticks(np.arange(-np.pi, np.pi + 1, np.pi))
+    plt.yticks(np.arange(-np.pi, np.pi + 1, np.pi))
     plt.title('Relative Phase Return Plot')
     plt.grid(True)
     plt.legend()
