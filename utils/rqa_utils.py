@@ -124,8 +124,6 @@ def perform_mrqa(data, radius=0.2, minLine=2, getRP=True):
 
     Parameters:
     data (pd.DataFrame): The input data with time series to be analyzed.
-    delay (int): The time delay for embedding.
-    embedding_dimension (int): The embedding dimension for the time series.
     radius (float): The radius for defining neighborhoods in phase space.
     minLine (int): The minimum line length for MRQA measures.
     getRP (bool): Whether to compute Recurrence Plots (RP). Default is True.

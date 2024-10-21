@@ -40,7 +40,7 @@ The tutorial is divided into the following sections:
 2. **Cross Recurrence Quantification Analysis**
    - [**Categorical CRQA**](crqaCategorical.ipynb): Explore coordinated behaviour between two categorical time series.
    - [**Continuous CRQA**](crqaContinuous.ipynb): Explore coordinated behaviour between two continuous time series.
-   - **Multidimensional Recurrence Quantification Analysis (mdRQA)**: Learn how to apply RQA to multivariate data.
+   - [**Multidimensional Recurrence Quantification Analysis (mdRQA)**](mdrqaContinuous.ipynb): Learn how to apply RQA to multivariate data.
 5. **Phase Space Reconstruction**
     - [**Average Mutual Information (AMI)**](ami.ipynb): Learn how to determine the appropriate delay RQA.
     - [**False Nearest Neighbours (FNN)**](fnn.ipynb): Learn how to select the appropriate embedding dimension for RQA. 
@@ -48,6 +48,6 @@ The tutorial is divided into the following sections:
     - [**Detrended Fluctuation Analysis (DFA)**](dfaAnalysis.ipynb): Learn about DFA, a method used to detect long-term statistical dependencies in time series data. DFA is particularly useful for analysing non-stationary processes where traditional methods may not apply.
     - [**Windowed DFA**](dfaWindowed.ipynb): Understand how to apply DFA in a windowed manner to assess how patterns of variability evolve over time.
     - [**Complexity Matching**](complexityMatching.ipynb): Learn about various methods for capturing the alignment of variability across time series, also known as complexity matching. 
-10. **Linear Metrics**: Examine the use of linear metrics to analyse and summarise time series characteristics.
+10. [**Linear Metrics**](linearAnalyses.ipynb): Examine the use of linear metrics to analyse and summarise time series characteristics.
 
 We hope this tutorial serves as a helpful resource for delving into the world of using time series analysis in social and behavioural research. 

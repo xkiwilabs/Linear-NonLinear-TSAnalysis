@@ -7,6 +7,7 @@ plt.rcParams['figure.figsize'] = (12, 5)
 plt.rcParams['figure.dpi'] = 100  # Set a moderate DPI to make plots appear smaller
 
 def plot_time_series(numerical_data, save_image, file_path):
+    numerical_data = (numerical_data - np.mean(numerical_data)) / np.std(numerical_data)
     plt.figure()
     time = range(len(numerical_data))
     plt.plot(time, numerical_data, color='blue', linewidth=0.5)
@@ -28,6 +29,7 @@ def plot_rqa(recurrence_matrix, save_image, file_path):
     plt.show()
 
 def plot_ts_and_rqa(numerical_data, recurrence_matrix, rqa_metrics, save_image, file_path, y_axis_label = 'Data'):
+    numerical_data = (numerical_data - np.mean(numerical_data)) / np.std(numerical_data)
     # Create a side-by-side plot of the time series, recurrence plot, and metrics
     fig, axes = plt.subplots(1, 3, gridspec_kw={'width_ratios': [1, 1, 0.5]})
 
@@ -57,6 +59,7 @@ def plot_ts_and_rqa(numerical_data, recurrence_matrix, rqa_metrics, save_image, 
     plt.show()
 
 def plot_windowed_ts_and_rqa(numerical_data, recurrence_matrix, rqa_metrics, save_image, file_path):
+    numerical_data = (numerical_data - np.mean(numerical_data)) / np.std(numerical_data)
     # Create a side-by-side plot of the time series, recurrence plot, and metrics
     fig, axes = plt.subplots(1, 3, gridspec_kw={'width_ratios': [1, 1, 0.5]})
 
@@ -105,6 +108,7 @@ def plot_rqa_multi_radii(recurrence_matrices, rqa_metrics_list, radii, save_imag
     plt.show()
 
 def plot_ts_and_dfa(numerical_data, scales, flucts, fit_line, alpha, save_image, file_path):
+    numerical_data = (numerical_data - np.mean(numerical_data)) / np.std(numerical_data)
     # Create a side-by-side plot of the time series and DFA results
     fig, axes = plt.subplots(1, 2, figsize=(15, 5))
 
@@ -149,6 +153,8 @@ def plot_cm_cross_cor(cross_corr_values, save_image, file_path):
     plt.show()
 
 def plot_ts_and_crqa(ts_a, ts_b, recurrence_matrix, rqa_metrics, save_image, file_path):
+    ts_a = (ts_a - np.mean(ts_a)) / np.std(ts_a)
+    ts_b = (ts_b - np.mean(ts_b)) / np.std(ts_b)
     # Create a custom layout with GridSpec
     fig = plt.figure(figsize=(15, 6))
     spec = GridSpec(3, 3, figure=fig, width_ratios=[1, 1, 0.5], height_ratios=[1, 1, 1], hspace=0.75)
@@ -181,6 +187,43 @@ def plot_ts_and_crqa(ts_a, ts_b, recurrence_matrix, rqa_metrics, save_image, fil
     ax_metrics.text(0.1, 0.5, metrics_text, fontsize=10, verticalalignment='center', transform=ax_metrics.transAxes)
     ax_metrics.axis('off')
     ax_metrics.set_title('CRQA Metrics')
+
+    # Save and/or show the plot
+    if save_image:
+        plt.savefig(file_path)
+    plt.show()
+
+def plot_ts_and_mdrqa(dataframe, recurrence_matrix, rqa_metrics, save_image, file_path):
+    # Normalize each time series in the dataframe using z-score
+    normalized_data = dataframe.apply(lambda x: (x - x.mean()) / x.std(), axis=0)
+
+    # Create a custom layout with GridSpec
+    fig = plt.figure(figsize=(15, 8))
+    spec = GridSpec(2, 3, figure=fig, width_ratios=[1, 1, 0.5], height_ratios=[2, 1], hspace=0.5, wspace=0.5)
+
+    # Plot all time series on the same subplot
+    ax_ts = fig.add_subplot(spec[0, 0])
+    for column in normalized_data.columns:
+        ax_ts.plot(range(len(normalized_data[column])), normalized_data[column], linewidth=0.5, label=f'Time Series {column}')
+    ax_ts.set_title('Normalized Time Series')
+    ax_ts.set_xlabel('Time')
+    ax_ts.set_ylabel('Value')
+    ax_ts.legend()
+
+    # Plot recurrence plot for MdRQA
+    ax_rqa = fig.add_subplot(spec[0, 1])
+    ax_rqa.imshow(recurrence_matrix, cmap='Blues', origin='lower')
+    ax_rqa.set_title('MdRQA Recurrence Plot')
+
+    # Display RQA metrics in the third panel
+    ax_metrics = fig.add_subplot(spec[0, 2])
+    if rqa_metrics:
+        metrics_text = "\n".join([f"{key}: {value:.3f}" for key, value in rqa_metrics.items()])
+    else:
+        metrics_text = "No metrics available"
+    ax_metrics.text(0.1, 0.5, metrics_text, fontsize=10, verticalalignment='center', transform=ax_metrics.transAxes)
+    ax_metrics.axis('off')
+    ax_metrics.set_title('MdRQA Metrics')
 
     # Save and/or show the plot
     if save_image:
