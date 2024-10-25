@@ -1,6 +1,6 @@
 ### Set-up Information
 
-Follow these steps to set up the environment for this tutorial:
+Follow these steps to set up the environment for this tutorial: 
 
 1. **Download Python**
 

@@ -24,7 +24,7 @@ Macpherson, C., Richardson, M., & Kallen, R. W. (2024). Advanced quantitative ap
   - The GitHub Repository can be cloned from here: https://github.com/xkiwilabs/Linear-NonLinear-TSAnalysis.git
   - To install the required dependencies, use:
        ```sh
-     pip install -r requirements.txt
+     pip install -r requirements.txt 
     ```
 
 --- 
