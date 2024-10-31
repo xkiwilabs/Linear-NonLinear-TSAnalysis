@@ -129,13 +129,16 @@ def cross_ami(timeseries1, timeseries2, min_lag, max_lag):
     
     return cross_ami_result
 
-def plot_ami(ami_result):
+def plot_ami(ami_result, save_image, file_path):
     # Plot AMI Function
     plt.figure()
     plt.plot(ami_result[:, 0], ami_result[:, 1])
     plt.xlabel('TLag')
     plt.ylabel('AMI')
     plt.title('Average Mutual Information')
+    plt.show()
+    if save_image:
+        plt.savefig(file_path)
     plt.show()
 
 def plot_cross_ami(cross_ami_result):

@@ -1,4 +1,4 @@
-### Set-up Information
+## Set-up Information
 
 Follow these steps to set up the environment for this tutorial: 
 

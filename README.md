@@ -18,7 +18,7 @@ Macpherson, C., Richardson, M., & Kallen, R. W. (2024). Advanced quantitative ap
 ### Set-up Information
 
 - For novice users: 
-  - Refer to the [set up instructions](SETUP.md) for full details regarding how to set up the environment for this tutorial.
+  - Please refer to the [set up instructions](SETUP.md) for full details regarding how to set up the environment for this tutorial.
 - For users familiar with python and Visual Studio Code: 
   - [VS Code](https://code.visualstudio.com/) is the recommended editor for this tutorial. To work with Jupyter notebooks in VS Code, ensure that the "Jupyter" extension has been installed.
   - The GitHub Repository can be cloned from here: https://github.com/xkiwilabs/Linear-NonLinear-TSAnalysis.git
@@ -36,7 +36,7 @@ The tutorial is divided into the following sections:
 1. **Recurrence Quantification Analysis**
    - [**Categorical RQA**](rqaCategorical.ipynb): Learn about RQA for categorical data and its application in understanding the dynamics of categorical events.
    - [**Continuous RQA**](rqaContinuous.ipynb): Apply RQA to continuous time series data, providing insights into the temporal structure of continuous data.
-   - [**Windowed RQA**](rqaWindowed.ipynb): Understand how to apply RQA in a windowed manner to observe temporal changes in recurrence over time.
+   - [**Windowed (C)RQA**](rqaWindowed.ipynb): Understand how to apply RQA in a windowed manner to observe temporal changes in recurrence over time.
 2. **Cross Recurrence Quantification Analysis**
    - [**Categorical CRQA**](crqaCategorical.ipynb): Explore coordinated behaviour between two categorical time series.
    - [**Continuous CRQA**](crqaContinuous.ipynb): Explore coordinated behaviour between two continuous time series.
@@ -51,3 +51,11 @@ The tutorial is divided into the following sections:
 10. [**Linear Metrics**](linearAnalyses.ipynb): Examine the use of linear metrics to analyse and summarise time series characteristics.
 
 We hope this tutorial serves as a helpful resource for delving into the world of using time series analysis in social and behavioural research. 
+
+---
+
+### References
+
+This tutorial employs tools from [PyRQA](https://pypi.org/project/PyRQA/) to run RQA:
+
+Rawald, T., Sips, M., & Marwan, N. (2017). PyRQA: Conducting recurrence quantification analysis on very long time series efficiently. *Computers & Geosciences, 104*, 101-108.
