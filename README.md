@@ -48,7 +48,7 @@ The tutorial is divided into the following sections:
     - [**Detrended Fluctuation Analysis (DFA)**](dfaAnalysis.ipynb): Learn about DFA, a method used to detect long-term statistical dependencies in time series data. DFA is particularly useful for analysing non-stationary processes where traditional methods may not apply.
     - [**Windowed DFA**](dfaWindowed.ipynb): Understand how to apply DFA in a windowed manner to assess how patterns of variability evolve over time.
     - [**Complexity Matching**](complexityMatching.ipynb): Learn about various methods for capturing the alignment of variability across time series, also known as complexity matching. 
-10. [**Linear Metrics**](linearAnalyses.ipynb): Examine the use of linear metrics to analyse and summarise time series characteristics.
+10. [**Linear Metrics**](linearAnalyses.ipynb): *COMING SOON* Examine the use of linear metrics to analyse and summarise time series characteristics.
 
 We hope this tutorial serves as a helpful resource for delving into the world of using time series analysis in social and behavioural research. 
 
