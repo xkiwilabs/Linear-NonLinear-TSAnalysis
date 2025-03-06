@@ -1,166 +1,150 @@
-# Import the necessary libraries
-from pyrqa.time_series import TimeSeries
-from pyrqa.settings import Settings
-from pyrqa.analysis_type import Classic
-from pyrqa.analysis_type import Cross
-from pyrqa.neighbourhood import FixedRadius
-from pyrqa.metric import EuclideanMetric
-from pyrqa.time_series import EmbeddedSeries
-from pyrqa.computation import RQAComputation, RPComputation
+from utils import utils, plot_utils, output_io_utils
+from utils import rqa_utils_cpp
 
-# Define the RQA functions
-def perform_rqa(data, delay=15, embedding_dimension=3, radius=0.2, minLine=2, getRP=True):
+def perform_rqa(data, params):
     """
-    Perform Recurrence Quantification Analysis (RQA) and optionally compute Recurrence Plots (RP) 
-    on the provided data.
-
+    Perform Auto Recurrence Quantification Analysis (RQA).
     Parameters:
-    data (pd.DataFrame): The input data with time series to be analyzed.
-    delay (int): The time delay for embedding.
-    embedding_dimension (int): The embedding dimension for the time series.
-    radius (float): The radius for defining neighborhoods in phase space.
-    minLine (int): The minimum line length for RQA measures.
-    getRP (bool): Whether to compute Recurrence Plots (RP). Default is True.
-
-    Returns:
-    dict: A dictionary containing RQA results for each column.
-    dict (optional): A dictionary containing RP results for each column, if getRP is True.
+        data (np.DataFrame): Time series data.
+        params (dict): Dictionary of RQA parameters:
+                       - norm, eDim, tLag, rescaleNorm, radius, tmin, minl,
+                         doPlots, plotMode, phaseSpace, doStatsFile
+      Returns:
+        dict: RQA results for each column in the data.
+        dict: Recurrence plot results (if applicable).
     """
-    rqa_results = {}  # Dictionary to store RQA results
-    rp_results = {}  # Dictionary to store RP results (if getRP is True)
-    
-    for column in data.columns:
-        # Create a time series object for the current column
-        time_series = TimeSeries(data[column], embedding_dimension=embedding_dimension, time_delay=delay)
-        
-        # Set up the settings for RQA computation
-        settings = Settings(
-            time_series,
-            analysis_type=Classic,
-            neighbourhood=FixedRadius(radius),
-            similarity_measure=EuclideanMetric
-        )
-        
-        # Perform RQA computation
-        computation = RQAComputation.create(settings)
-        result = computation.run()
-        
-        # Set minimum line lengths for RQA measures
-        result.min_diagonal_line_length = minLine
-        result.min_vertical_line_length = minLine
-        result.min_white_vertical_line_length = minLine
-        
-        # Store the RQA result
-        rqa_results[column] = result
-        
-        # Optionally compute the Recurrence Plot
-        if getRP:
-            rp_computation = RPComputation.create(settings)
-            rp_result = rp_computation.run()
-            rp_results[column] = rp_result
-    
-    # Return the results
-    if getRP:
-        return rqa_results, rp_results
-    else:
-        return rqa_results
 
+    # Normalize data
+    dataX = utils.normalize_data(data, params['norm'])
 
-# Function to perform CRQA
-def perform_crqa(data, delay=15, embedding_dimension=3, radius=0.2, minLine=2, getRP=True):
-    """
-    Perform Cross Recurrence Quantification Analysis (CRQA) and optionally compute Cross Recurrence Plots (CRP) 
-    on the provided data.
+    # Compute distance matrix
+    ds = rqa_utils_cpp.rqa_dist(dataX, dataX, dim=params['eDim'], lag=params['tLag'])
 
-    Parameters:
-    data (pd.DataFrame): The input data with time series to be analyzed.
-    delay (int): The time delay for embedding.
-    embedding_dimension (int): The embedding dimension for the time series.
-    radius (float): The radius for defining neighborhoods in phase space.
-    minLine (int): The minimum line length for CRQA measures.
-    getRP (bool): Whether to compute Cross Recurrence Plots (CRP). Default is True.
-
-    Returns:
-    dict: A dictionary containing CRQA results for each pair of columns.
-    dict (optional): A dictionary containing CRP results for each pair of columns, if getRP is True.
-    """
-    crqa_results = {}
-    crp_results = {}
-
-    time_series1 = TimeSeries(data.iloc[:, 0], embedding_dimension=embedding_dimension, time_delay=delay)
-    time_series2 = TimeSeries(data.iloc[:, 1], embedding_dimension=embedding_dimension, time_delay=delay)
-
-    settings = Settings(
-        (time_series1, time_series2),
-        analysis_type=Cross,
-        neighbourhood=FixedRadius(radius),
-        similarity_measure=EuclideanMetric
+    # Perform RQA calculations
+    td, rs, mats, err_code = rqa_utils_cpp.rqa_stats(
+        ds["d"], rescale=params['rescaleNorm'], rad=params['radius'], 
+        diag_ignore=params['tw'], minl=params['minl'], rqa_mode="auto"
     )
 
-    computation = RQAComputation.create(settings)
-    result = computation.run()
-
-    result.min_diagonal_line_length = minLine
-    result.min_vertical_line_length = minLine
-    result.min_white_vertical_line_length = minLine
-
-    crqa_results['0_1'] = result
-
-    if getRP:
-        crp_computation = RPComputation.create(settings)
-        crp_result = crp_computation.run()
-        crp_results['0_1'] = crp_result
-
-    if getRP:
-        return crqa_results, crp_results
+    if err_code == 0:
+        print(f"REC: {rs['perc_recur']:.3f} | DET: {rs['perc_determ']:.3f} | MAXLINE: {rs['maxl_found']:.2f}")
     else:
-        return crqa_results
-    
+        print("REC: 0.000 | DET: 0.000 | MAXLINE: 0.000")
 
-def perform_mrqa(data, radius=0.2, minLine=2, getRP=True):
-    """
-    Perform Multivariate Recurrence Quantification Analysis (MRQA) and optionally compute Recurrence Plots (RP)
-    on the provided data.
-
-    Parameters:
-    data (pd.DataFrame): The input data with time series to be analyzed.
-    radius (float): The radius for defining neighborhoods in phase space.
-    minLine (int): The minimum line length for MRQA measures.
-    getRP (bool): Whether to compute Recurrence Plots (RP). Default is True.
-
-    Returns:
-    dict: A dictionary containing MRQA results for the multivariate time series.
-    dict (optional): A dictionary containing RP results for the multivariate time series, if getRP is True.
-    """
-
-    # Combine all columns into a MultiTimeSeries object
-    multivariate_time_series = EmbeddedSeries(data.values.tolist())
-
-    # Set up the settings for MRQA computation
-    settings = Settings(
-        multivariate_time_series,
-        analysis_type=Classic,
-        neighbourhood=FixedRadius(radius),
-        similarity_measure=EuclideanMetric,
-        theiler_corrector=1
+    # Plot results if required
+    if params['doPlots']:
+        plot_utils.plot_rqa_results(
+            dataX=dataX, td=td, rs=rs,
+            plot_mode=params.get('plotMode', 'recurrence'),
+            phase_space=params.get('phaseSpace', False),
+            eDim=params['eDim'], tLag=params['tLag']
         )
 
-    # Perform MRQA computation
-    computation = RQAComputation.create(settings)
-    result = computation.run()
+    # Save statistics if required
+    if params['doStatsFile']:
+        output_io_utils.write_rqa_stats("AutoRQA", params, rs, err_code)
 
-    # Set minimum line lengths for MRQA measures
-    result.min_diagonal_line_length = minLine
-    result.min_vertical_line_length = minLine
-    result.min_white_vertical_line_length = minLine
+    return rs, td
 
-    # Optionally compute the Recurrence Plot
-    if getRP:
-        rp_computation = RPComputation.create(settings)
-        rp_result = rp_computation.run()
+# def perform_crqa(data1, data2, params):
+#     """
+#     Perform Cross Recurrence Quantification Analysis (RQA).
+#     Parameters:
+#         data1 (np.ndarray): Time series data 1.
+#         data2 (np.ndarray): Time series data 2.
+#         params (dict): Dictionary of RQA parameters:
+#                        - norm, eDim, tLag, rescaleNorm, radius, tmin, minl,
+#                          doPlots, plotMode, phaseSpace, doStatsFile
+#     """
 
-    # Return the results
-    if getRP:
-        return result, rp_result
-    else:
-        return result
+#     # Normalize data
+#     dataX1 = utils.normalize_data(data1, params['norm'])
+#     dataX2 = utils.normalize_data(data2, params['norm'])
+
+#     # Perform RQA computations
+#     ds = rqa_utils_cpp.rqa_dist(dataX1, dataX2, dim=params['eDim'], lag=params['tLag'])
+
+#     # Similarly, you can call xRQA_stats:
+#     td, rs, mats, err_code = rqa_utils_cpp.rqa_stats(ds["d"], rescale=params['rescaleNorm'], rad=params['radius'], diag_ignore=0, minl=params['minl'], rqa_mode="cross")
+
+#     # Print stats
+#     if err_code == 0:
+#         print(f"REC: {rs['perc_recur']:.3f} | DET: {rs['perc_determ']:.3f} | MAXLINE: {rs['maxl_found']:.2f}")
+#     else:
+#         print("REC: 0.000 | DET: 0.000 | MAXLINE: 0.000")
+
+#     # Plot results
+#     if params['doPlots']:
+#         plot_utils.plot_rqa_results(
+#             dataX=dataX1,
+#             dataY=dataX2,
+#             td=td,
+#             rs=rs,
+#             plot_mode=params.get('plotMode', 'recurrence'),  # Default is 'recurrence'
+#             phase_space=params.get('phaseSpace', False),    # Default is False
+#             eDim=params['eDim'],
+#             tLag=params['tLag']
+#         )
+
+#     # Write stats
+#     if params['doStatsFile']:
+#         output_io_utils.write_rqa_stats("CrossRQA", params, rs, err_code)
+
+def perform_crqa(data, params):
+    """
+    Perform Cross Recurrence Quantification Analysis (CRQA).
+
+    Parameters:
+        data (pd.DataFrame): A DataFrame with exactly two columns representing the two time series.
+        params (dict): Dictionary of CRQA parameters.
+
+    Returns:
+        dict: CRQA results.
+        dict: Recurrence plot results.
+    """
+    # Ensure the DataFrame has exactly two columns
+    if data.shape[1] != 2:
+        raise ValueError("Expected a DataFrame with exactly two columns for CRQA.")
+
+    # Extract the two time series
+    dataX1 = data.iloc[:, 0].values  # First column
+    dataX2 = data.iloc[:, 1].values  # Second column
+
+    # Normalize data
+    dataX1 = utils.normalize_data(dataX1, params['norm'])
+    dataX2 = utils.normalize_data(dataX2, params['norm'])
+
+    # Compute distance matrix for CRQA
+    ds = rqa_utils_cpp.rqa_dist(dataX1, dataX2, dim=params['eDim'], lag=params['tLag'])
+
+    # Perform RQA calculations
+    td, rs, mats, err_code = rqa_utils_cpp.rqa_stats(
+        ds["d"], rescale=params['rescaleNorm'], rad=params['radius'], 
+        diag_ignore=params['tw'], minl=params['minl'], rqa_mode="cross"
+    )
+
+    # Handle errors
+    if err_code != 0 or not isinstance(rs, dict):
+        print("Error in CRQA computation. Returning empty results.")
+        return {}, {}
+
+    print(f"REC: {rs.get('perc_recur', 0):.3f} | DET: {rs.get('perc_determ', 0):.3f} | MAXLINE: {rs.get('maxl_found', 0):.2f}")
+
+    # Plot results if required
+    if params['doPlots']:
+        plot_utils.plot_rqa_results(
+            dataX=dataX1,
+            dataY=dataX2,
+            td=td,
+            rs=rs,
+            plot_mode=params.get('plotMode', 'recurrence'),
+            phase_space=params.get('phaseSpace', False),
+            eDim=params['eDim'],
+            tLag=params['tLag']
+        )
+
+    # Save statistics if required
+    if params['doStatsFile']:
+        output_io_utils.write_rqa_stats("CrossRQA", params, rs, err_code)
+
+    return rs, td  # Return CRQA statistics and recurrence plot matrix

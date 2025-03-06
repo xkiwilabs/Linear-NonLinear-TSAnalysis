@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.gridspec import GridSpec
+from mpl_toolkits.mplot3d import Axes3D
 
 # Set global figure size to enforce smaller plots
 plt.rcParams['figure.figsize'] = (12, 5)
@@ -88,24 +89,59 @@ def plot_windowed_ts_and_rqa(numerical_data, recurrence_matrix, rqa_metrics, sav
         plt.savefig(file_path)
     plt.show()
 
-def plot_rqa_multi_radii(recurrence_matrices, rqa_metrics_list, radii, save_image, file_path):
-    # Create a plot with multiple recurrence plots for different radii
-    fig, axes = plt.subplots(1, len(recurrence_matrices), figsize=(15, 5))
+# def plot_rqa_multi_radii(recurrence_matrices, rqa_metrics_list, radii, save_image, file_path):
+#     # Create a plot with multiple recurrence plots for different radii
+#     fig, axes = plt.subplots(1, len(recurrence_matrices), figsize=(15, 5))
 
-    for i, (recurrence_matrix, rqa_metrics, radius) in enumerate(zip(recurrence_matrices, rqa_metrics_list, radii)):
-        # Plot recurrence plot
-        axes[i].imshow(recurrence_matrix, cmap='Blues', origin='lower')
-        axes[i].set_title(f'Recurrence Plot (Radius={radius})')
+#     for i, (recurrence_matrix, rqa_metrics, radius) in enumerate(zip(recurrence_matrices, rqa_metrics_list, radii)):
+#         # Plot recurrence plot
+#         axes[i].imshow(recurrence_matrix, cmap='Blues', origin='lower')
+#         axes[i].set_title(f'Recurrence Plot (Radius={radius})')
+
+#         # Display RQA metrics in the panel
+#         metrics_text = "\n".join([f"{key}: {value:.3f}" for key, value in rqa_metrics.items()])
+#         axes[i].text(0.1, -0.1, metrics_text, fontsize=8, verticalalignment='top', transform=axes[i].transAxes)
+
+#     # Adjust layout and save/show the plot
+#     plt.tight_layout()
+#     if save_image:
+#         plt.savefig(file_path)
+#     plt.show()
+
+def plot_rqa_multi_radii(recurrence_matrices, rqa_metrics_list, radii, save_image, file_path):
+    """
+    Plot exactly 3 recurrence plots (one per radius), ensuring unique matrices.
+    """
+
+    num_plots = min(len(recurrence_matrices), 3)  # Ensure only 3 subplots
+
+    fig, axes = plt.subplots(1, num_plots, figsize=(15, 5))  # ✅ Create 1 row, 3 columns
+
+    # Ensure `axes` is iterable even if there is only one subplot
+    if num_plots == 1:
+        axes = [axes]
+
+    for i in range(num_plots):
+        recurrence_matrix = np.array(recurrence_matrices[i], copy=True)  # Force independent copy
+        rqa_metrics = rqa_metrics_list[i]
+        radius = radii[i]
+
+        # ✅ Correctly assign each subplot
+        ax = axes[i]
+        im = ax.imshow(recurrence_matrix, cmap='Blues', origin='lower')
+        ax.set_title(f'Recurrence Plot (Radius={radius})')
 
         # Display RQA metrics in the panel
         metrics_text = "\n".join([f"{key}: {value:.3f}" for key, value in rqa_metrics.items()])
-        axes[i].text(0.1, -0.1, metrics_text, fontsize=8, verticalalignment='top', transform=axes[i].transAxes)
+        ax.text(0.1, -0.1, metrics_text, fontsize=8, verticalalignment='top', transform=ax.transAxes)
 
-    # Adjust layout and save/show the plot
+    # ✅ Adjust layout properly
     plt.tight_layout()
     if save_image:
         plt.savefig(file_path)
     plt.show()
+
+
 
 def plot_ts_and_dfa(numerical_data, scales, flucts, fit_line, alpha, save_image, file_path):
     numerical_data = (numerical_data - np.mean(numerical_data)) / np.std(numerical_data)
@@ -228,4 +264,79 @@ def plot_ts_and_mdrqa(dataframe, recurrence_matrix, rqa_metrics, save_image, fil
     # Save and/or show the plot
     if save_image:
         plt.savefig(file_path)
+    plt.show()
+
+def plot_rqa_results(dataX, dataY=None, td=None, rs=None, plot_mode='recurrence', phase_space=False, eDim=3, tLag=1):
+    """
+    Plot RQA results based on the chosen mode.
+
+    Parameters:
+        dataX (np.ndarray): Time series data for X-axis.
+        dataY (np.ndarray): Time series data for Y-axis (for cross-RQA).
+        td (np.ndarray): Thresholded distance matrix (recurrence or cross-recurrence plot).
+        rs (dict): RQA statistics dictionary (optional for display).
+        plot_mode (str): 
+            'recurrence': Basic recurrence plot.
+            'recurrence_with_timeseries': Recurrence plot with time series underneath or to the side.
+            'phase_space': Recurrence plot with phase space reconstruction.
+        phase_space (bool): True to include a 2D/3D phase space plot.
+        eDim (int): Embedding dimension for phase space.
+        tLag (int): Time lag for phase space.
+    """
+
+    def reconstruct_phase_space(data, dim, lag):
+        """ Reconstruct phase space using embedding dimension and time lag """
+        n_points = len(data) - (dim - 1) * lag
+        phase_space = np.array([data[i:i + n_points] for i in range(0, dim * lag, lag)]).T
+        return phase_space
+
+    plt.figure(figsize=(10, 8))
+
+    # Plot 1: Recurrence or Cross-Recurrence Plot
+    plt.subplot(2, 2, 1)
+    plt.imshow((1 - td).T, cmap='gray', origin='lower')
+    title = "Cross-Recurrence Plot" if dataY is not None else "Recurrence Plot"
+    plt.title(title)
+    plt.xlabel("X(i)")
+    plt.ylabel("Y(j)" if dataY is not None else "X(j)")
+
+    # Optionally display RQA statistics
+    if rs:
+        plt.figtext(0.5, 0.02, f"%REC: {rs['perc_recur']:.2f} | %DET: {rs['perc_determ']:.2f} | "
+                               f"MAXLINE: {rs['maxl_found']:.0f} | MEANLINE: {rs['llmnsd'][0]:.0f} | "
+                               f"ENTROPY: {rs['entropy'][0]:.2f}",
+                    ha="center", fontsize=10)
+
+    # Plot 2: Time Series - Underneath or to the side
+    if plot_mode == 'recurrence_with_timeseries':
+        plt.subplot(2, 2, 3)
+        plt.plot(dataX, 'b-')
+        plt.title("Time Series (X)")
+        plt.xlabel("Sample")
+        plt.ylabel("Amplitude")
+        if dataY is not None:
+            plt.subplot(2, 2, 4)
+            plt.plot(dataY, 'g-')
+            plt.title("Time Series (Y)")
+            plt.xlabel("Sample")
+            plt.ylabel("Amplitude")
+
+    # Plot 3: Phase Space Reconstruction
+    if phase_space:
+        phase_data = reconstruct_phase_space(dataX, eDim, tLag)
+        if eDim == 2:
+            plt.subplot(2, 2, 4)
+            plt.plot(phase_data[:, 0], phase_data[:, 1], 'b-')
+            plt.title("2D Phase Space Reconstruction")
+            plt.xlabel("X(t)")
+            plt.ylabel(f"X(t + {tLag})")
+        elif eDim >= 3:
+            ax = plt.subplot(2, 2, 4, projection='3d')
+            ax.plot(phase_data[:, 0], phase_data[:, 1], phase_data[:, 2], 'b-')
+            ax.set_title("3D Phase Space Reconstruction")
+            ax.set_xlabel("X(t)")
+            ax.set_ylabel(f"X(t + {tLag})")
+            ax.set_zlabel(f"X(t + {2 * tLag})")
+
+    plt.tight_layout()
     plt.show()

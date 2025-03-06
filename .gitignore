@@ -1,2 +1,6 @@
 # Ignore the virtual environment folder
 .venv/
+__pycache__/autoRQA.cpython-311.pyc
+__pycache__/crossRQA.cpython-311.pyc
+__pycache__/autoRQA.cpython-311.pyc
+__pycache__/crossRQA.cpython-311.pyc
