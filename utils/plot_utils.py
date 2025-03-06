@@ -89,59 +89,59 @@ def plot_windowed_ts_and_rqa(numerical_data, recurrence_matrix, rqa_metrics, sav
         plt.savefig(file_path)
     plt.show()
 
-# def plot_rqa_multi_radii(recurrence_matrices, rqa_metrics_list, radii, save_image, file_path):
-#     # Create a plot with multiple recurrence plots for different radii
-#     fig, axes = plt.subplots(1, len(recurrence_matrices), figsize=(15, 5))
-
-#     for i, (recurrence_matrix, rqa_metrics, radius) in enumerate(zip(recurrence_matrices, rqa_metrics_list, radii)):
-#         # Plot recurrence plot
-#         axes[i].imshow(recurrence_matrix, cmap='Blues', origin='lower')
-#         axes[i].set_title(f'Recurrence Plot (Radius={radius})')
-
-#         # Display RQA metrics in the panel
-#         metrics_text = "\n".join([f"{key}: {value:.3f}" for key, value in rqa_metrics.items()])
-#         axes[i].text(0.1, -0.1, metrics_text, fontsize=8, verticalalignment='top', transform=axes[i].transAxes)
-
-#     # Adjust layout and save/show the plot
-#     plt.tight_layout()
-#     if save_image:
-#         plt.savefig(file_path)
-#     plt.show()
+import numpy as np
+import matplotlib.pyplot as plt
 
 def plot_rqa_multi_radii(recurrence_matrices, rqa_metrics_list, radii, save_image, file_path):
     """
-    Plot exactly 3 recurrence plots (one per radius), ensuring unique matrices.
+    Plots multiple recurrence matrices with corresponding RQA metrics.
+
+    Parameters:
+        recurrence_matrices (list of np.ndarray): List of recurrence matrices to plot.
+        rqa_metrics_list (list of dict): List of dictionaries containing RQA metrics for each recurrence matrix.
+        radii (list of float): List of recurrence radii used for each plot.
+        save_image (bool): Whether to save the plot as an image.
+        file_path (str): File path for saving the plot.
     """
+    
+    # Limit the number of plots to 3 to ensure readability
+    num_plots = min(len(recurrence_matrices), 3)
+    
+    # Create subplots with one row and 'num_plots' columns
+    fig, axes = plt.subplots(1, num_plots, figsize=(15, 5))
 
-    num_plots = min(len(recurrence_matrices), 3)  # Ensure only 3 subplots
-
-    fig, axes = plt.subplots(1, num_plots, figsize=(15, 5))  # ✅ Create 1 row, 3 columns
-
-    # Ensure `axes` is iterable even if there is only one subplot
+    # Ensure axes is always iterable (handles case when num_plots = 1)
     if num_plots == 1:
         axes = [axes]
 
+    # Loop through the number of plots to display
     for i in range(num_plots):
-        recurrence_matrix = np.array(recurrence_matrices[i], copy=True)  # Force independent copy
+        # Copy recurrence matrix to avoid modifying the original data
+        recurrence_matrix = np.array(recurrence_matrices[i], copy=True)
+        # Retrieve the corresponding RQA metrics and radius
         rqa_metrics = rqa_metrics_list[i]
         radius = radii[i]
 
-        # ✅ Correctly assign each subplot
+        # Select the corresponding axis
         ax = axes[i]
+        # Plot the recurrence matrix with a blue colormap
         im = ax.imshow(recurrence_matrix, cmap='Blues', origin='lower')
+        # Set the title with the radius value
         ax.set_title(f'Recurrence Plot (Radius={radius})')
 
-        # Display RQA metrics in the panel
+        # Format RQA metrics as text and display it below the plot
         metrics_text = "\n".join([f"{key}: {value:.3f}" for key, value in rqa_metrics.items()])
         ax.text(0.1, -0.1, metrics_text, fontsize=8, verticalalignment='top', transform=ax.transAxes)
 
-    # ✅ Adjust layout properly
+    # Adjust layout for better spacing
     plt.tight_layout()
+
+    # Save the plot if requested
     if save_image:
         plt.savefig(file_path)
+
+    # Show the final plot
     plt.show()
-
-
 
 def plot_ts_and_dfa(numerical_data, scales, flucts, fit_line, alpha, save_image, file_path):
     numerical_data = (numerical_data - np.mean(numerical_data)) / np.std(numerical_data)
