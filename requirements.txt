@@ -61,3 +61,4 @@ tzdata
 unicodedata2
 wcwidth
 zipp
+siphash24
