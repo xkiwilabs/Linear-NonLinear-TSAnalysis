@@ -56,6 +56,6 @@ We hope this tutorial serves as a helpful resource for delving into the world of
 
 ### References
 
-This tutorial employs tools from [PyRQA](https://pypi.org/project/PyRQA/) to run RQA:
+This tutorial employs tools from [PyRQA](https://pypi.org/project/PyRQA/) to run MdRQA:
 
 Rawald, T., Sips, M., & Marwan, N. (2017). PyRQA: Conducting recurrence quantification analysis on very long time series efficiently. *Computers & Geosciences, 104*, 101-108.
