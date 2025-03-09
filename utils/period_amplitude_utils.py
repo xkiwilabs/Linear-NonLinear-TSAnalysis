@@ -132,14 +132,14 @@ def amplitude(timeseries, samplerate, DistFLT="auto", AmpFLT="auto"):
 
     # Find valleys
     vLocs, _ = find_peaks(-x, distance=min_peak_distance, height=min_peak_height)
-    valleys = -x[vLocs]
+    valleys = x[vLocs]
 
     # Determine appropriate length for amplitude calculations
     pvLength = min(len(peaks), len(valleys))
 
     # Calculate mean and SD of amplitude
-    meanAmp = np.mean(peaks[:pvLength] - valleys[:pvLength])
-    sdAmp = np.std(peaks[:pvLength] - valleys[:pvLength])
+    meanAmp = np.mean(peaks[:pvLength] - valleys[:pvLength])/2
+    sdAmp = np.std(peaks[:pvLength] - valleys[:pvLength])/2
 
     return meanAmp, sdAmp, peaks, pkLocs, valleys, vLocs
 
@@ -173,3 +173,4 @@ def plot_amplitude(timeseries, samplerate, peaks, pkLocs, valleys, vLocs):
     plt.legend()
     plt.grid(True)
     plt.show()
+
