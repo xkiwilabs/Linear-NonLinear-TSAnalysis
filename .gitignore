@@ -1,6 +1,18 @@
 # Ignore the virtual environment folder
 .venv/
-__pycache__/autoRQA.cpython-311.pyc
-__pycache__/crossRQA.cpython-311.pyc
-__pycache__/autoRQA.cpython-311.pyc
-__pycache__/crossRQA.cpython-311.pyc
+
+# Ignore compiled Python bytecode
+__pycache__/
+
+# Ignore build directories and temporary files
+build/
+dist/
+*.egg-info/
+
+# Ignore compiled C++ extension files
+*.pyd
+*.so
+*.dll
+
+# Ignore temporary logs and cache
+*.log

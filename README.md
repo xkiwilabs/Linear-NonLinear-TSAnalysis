@@ -19,12 +19,16 @@ Macpherson, C., Richardson, M., & Kallen, R. W. (2024). Advanced quantitative ap
 
 - For novice users: 
   - Please refer to the [set up instructions](SETUP.md) for full details regarding how to set up the environment for this tutorial.
-- For users familiar with python and Visual Studio Code: 
+- For users familiar with Python and Visual Studio Code: 
   - [VS Code](https://code.visualstudio.com/) is the recommended editor for this tutorial. To work with Jupyter notebooks in VS Code, ensure that the "Jupyter" extension has been installed.
   - The GitHub Repository can be cloned from here: https://github.com/xkiwilabs/Linear-NonLinear-TSAnalysis.git
   - To install the required dependencies, use:
        ```sh
      pip install -r requirements.txt 
+     ```
+  - This tutorial includes C++ extensions that need to be compiled before use. To compile the code, ensure you have a C++ compiler installed and then run:
+    ```sh
+    python setup.py build_ext --inplace
     ```
 
 --- 
@@ -48,7 +52,7 @@ The tutorial is divided into the following sections:
     - [**Detrended Fluctuation Analysis (DFA)**](dfaAnalysis.ipynb): Learn about DFA, a method used to detect long-term statistical dependencies in time series data. DFA is particularly useful for analysing non-stationary processes where traditional methods may not apply.
     - [**Windowed DFA**](dfaWindowed.ipynb): Understand how to apply DFA in a windowed manner to assess how patterns of variability evolve over time.
     - [**Complexity Matching**](complexityMatching.ipynb): Learn about various methods for capturing the alignment of variability across time series, also known as complexity matching. 
-10. [**Linear Metrics**](linearAnalyses.ipynb): *COMING SOON* Examine the use of linear metrics to analyse and summarise time series characteristics.
+10. [**Linear Metrics**](linearAnalyses.ipynb): Examine the use of linear metrics to analyse and summarise time series characteristics.
 
 We hope this tutorial serves as a helpful resource for delving into the world of using time series analysis in social and behavioural research. 
 
