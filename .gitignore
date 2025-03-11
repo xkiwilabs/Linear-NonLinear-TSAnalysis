@@ -3,7 +3,7 @@
 test_env/
 
 # Ignore compiled Python bytecode
-__pycache__/
+utils/__pycache__/
 
 # Ignore build directories and temporary files
 build/
@@ -11,9 +11,9 @@ dist/
 *.egg-info/
 
 # Ignore compiled C++ extension files
-*.pyd
-*.so
-*.dll
+utils/*.pyd
+utils/*.so
+utils/*.dll
 
 # Ignore temporary logs and cache
 *.log
