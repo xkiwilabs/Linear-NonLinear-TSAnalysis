@@ -60,6 +60,7 @@ We hope this tutorial serves as a helpful resource for delving into the world of
 
 ### References
 
-This tutorial employs tools from [PyRQA](https://pypi.org/project/PyRQA/) to run MdRQA:
-
-Rawald, T., Sips, M., & Marwan, N. (2017). PyRQA: Conducting recurrence quantification analysis on very long time series efficiently. *Computers & Geosciences, 104*, 101-108.
+- The code used to run RQA and CRQA in the tutorial can be found as a standalone Python package here: [Recurrence Quantification Analysis](https://github.com/xkiwilabs/Recurrence-Quantification-Analysis).
+  - Alternatively, a matlab version can be found here: [MATLAB Time Series Toolboxes](https://github.com/xkiwilabs/MATLAB-Toolboxes).
+- To run MdRQA, this tutorial employs tools from [PyRQA](https://pypi.org/project/PyRQA/):
+  - Rawald, T., Sips, M., & Marwan, N. (2017). PyRQA: Conducting recurrence quantification analysis on very long time series efficiently. *Computers & Geosciences, 104*, 101-108.
