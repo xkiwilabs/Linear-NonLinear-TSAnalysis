@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import numpy as np
+import os
 
 
 def perform_rqa(data, params, filename):
@@ -48,12 +49,18 @@ def perform_rqa(data, params, filename):
     # Plot results
     # plotMode: 'none', 'rp', 'rp_timeseries',
     plot_mode = params.get('plotMode', 'rp')
-    if plot_mode == 'rp' or plot_mode == 'rp-timeseries':
+    if plot_mode in ('rp', 'rp-timeseries'):
+        save_path = None
+        if params.get('saveFig', False):
+            base_path = os.path.join('images', 'rqa', f"{os.path.splitext(os.path.basename(filename))[0]}_rqa.png")
+            save_path = cleaning_utils.get_unique_filepath(base_path)
+
         plot_rqa_results(
             dataX=dataX,
             td=td,
             plot_mode=plot_mode,
             point_size=params['pointSize'],
+            save_path=save_path 
         )
 
     # Save statistics if required
@@ -109,12 +116,18 @@ def perform_crqa(data, params, filename):
     # Plot results
     # plotMode: 'none', 'rp', 'rp_timeseries',
     if 'rp' in params['plotMode']:
+        save_path = None
+        if params.get('saveFig', False):
+            base_path = os.path.join('images', 'rqa', f"{os.path.splitext(os.path.basename(filename))[0]}_crqa.png")
+            save_path = cleaning_utils.get_unique_filepath(base_path)
+
         plot_rqa_results(
             dataX=dataX1,
             dataY=dataX2,
             td=td,
             plot_mode=params['plotMode'],
             point_size=params['pointSize'],
+            save_path=save_path  
         )
 
     # Write stats
@@ -123,8 +136,8 @@ def perform_crqa(data, params, filename):
 
 def plot_rqa_results(
     dataX=None, dataY=None, td=None,
-    plot_mode='rp', point_size=4
-):
+    plot_mode='rp', point_size=4,
+    save_path=None):
     """
     Plot RQA or CRQA results with aligned RP and TS width.
     """
@@ -175,5 +188,11 @@ def plot_rqa_results(
     else:
         fig.align_xlabels([ax_rp])
         fig.align_ylabels([ax_rp])
+
+    if save_path:
+       import os
+       os.makedirs(os.path.dirname(save_path), exist_ok=True)
+       plt.savefig(save_path, dpi=300, bbox_inches='tight')
+       print(f"Plot saved to: {save_path}")
 
     plt.show()

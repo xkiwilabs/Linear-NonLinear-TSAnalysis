@@ -96,3 +96,19 @@ def normalize_data(data, norm):
         return data - np.mean(data)  # Center around mean
     else:
         return data  # No normalization
+
+def get_unique_filepath(base_path):
+    """
+    Appends a number to the filename if a file already exists.
+    E.g., 'file.png' -> 'file_1.png', 'file_2.png', etc.
+    """
+    if not os.path.exists(base_path):
+        return base_path
+
+    base, ext = os.path.splitext(base_path)
+    counter = 1
+    new_path = f"{base}_{counter}{ext}"
+    while os.path.exists(new_path):
+        counter += 1
+        new_path = f"{base}_{counter}{ext}"
+    return new_path
