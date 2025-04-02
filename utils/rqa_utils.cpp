@@ -17,7 +17,7 @@ namespace py = pybind11;
  * rqa_dist
  *
  * Compute distances between all points of two vectors,
- * which are embedded using time lags.
+ * embedded using time lags.
  ************************************/
 py::dict rqa_dist(py::array_t<float> a, py::array_t<float> b, int dim, int lag) {
     auto buf_a = a.request();
@@ -76,7 +76,7 @@ py::dict rqa_dist(py::array_t<float> a, py::array_t<float> b, int dim, int lag) 
  *
  * Threshold a square distance matrix.
  * 
- * The parameter diag_ignore indicates how many diagonals to zero out:
+ * diag_ignore indicates how many diagonals to zero out:
  *   - For auto RQA, 1 ignores the main diagonal only,
  *     2 ignores the main diagonal and one off-diagonal on each side, etc.
  *   - For cross RQA, diag_ignore should be 0.
@@ -118,7 +118,7 @@ py::array_t<int8_t> rqa_radius(py::array_t<float> dist, int rescale, float rad, 
         thrd_ptr[i] = (scaled[i] <= rad) ? 1 : 0;
     }
 
-    // Zero out the diagonals (Theiler window) based on diag_ignore.
+    // Zero out the diagonals based on diag_ignore.
     if (diag_ignore != 0) {
         for (int d = 0; d < diag_ignore; d++) {
             for (int j = 0; j < n - d; j++) {
@@ -136,8 +136,7 @@ py::array_t<int8_t> rqa_radius(py::array_t<float> dist, int rescale, float rad, 
  *
  * Find all diagonal lines (and compute trend measures)
  * in a thresholded matrix.
- *
- * The parameter diag_ignore specifies the number of diagonals to ignore.
+ * diag_ignore specifies the number of diagonals to ignore.
  ************************************/
 py::tuple rqa_line(py::array_t<int8_t> thrd, int diag_ignore) {
     auto buf = thrd.request();
@@ -213,7 +212,7 @@ py::tuple rqa_line(py::array_t<int8_t> thrd, int diag_ignore) {
             recur[i][1] = recur[i][1] / recur[i][0];
     }
 
-    // Lower diagonal trend
+    // Compute lower diagonal trend
     int first = diag_ignore;
     int last = n - 1;
     int len_range = last - first + 1;
@@ -240,7 +239,7 @@ py::tuple rqa_line(py::array_t<int8_t> thrd, int diag_ignore) {
             trend1 = 1000 * ((valid_count * sum_xy - sum_x * sum_y) / denom);
     }
 
-    // Upper diagonal trend
+    // Compute upper diagonal trend
     int first_up = mid + diag_ignore;
     int last_up = 2 * n - 2;
     int len_range_up = last_up - first_up + 1;
@@ -374,14 +373,79 @@ py::list rqa_entropy(py::array_t<float> distr, int nstates) {
 }
 
 /************************************
+ * rqa_vertical
+ *
+ * Compute vertical line metrics.
+ * Iterates over each column of the threshold matrix.
+ * Returns a tuple:
+ *   (vertical_line_lengths, laminarity, trapping_time, Vmax)
+ *
+ *   - Laminarity (LAM) = (sum of vertical line lengths with length>=vmin) /
+ *                        (sum of all vertical line lengths found)
+ *   - Trapping Time (TT) = (sum of vertical line lengths with length>=vmin) / (number of such lines)
+ *   - Vmax = maximum vertical line length.
+ ************************************/
+py::tuple rqa_vertical(py::array_t<int8_t> thrd, int vmin) {
+    auto buf = thrd.request();
+    if (buf.ndim != 2 || buf.shape[0] != buf.shape[1])
+         throw std::runtime_error("Thresholded matrix must be square");
+    int n = buf.shape[0];
+    int8_t* data = static_cast<int8_t*>(buf.ptr);
+    std::vector<int> vert_lengths; // vertical lines with length >= vmin
+    double vertical_sum_valid = 0.0; // sum of lengths for vertical lines >= vmin
+    double vertical_total = 0.0;     // sum of lengths for all vertical segments (length>=1)
+    int count_valid = 0;
+    int Vmax = 0;
+    for (int j = 0; j < n; j++) {
+         int count = 0;
+         for (int i = 0; i < n; i++) {
+             int idx = i * n + j;
+             if (data[idx] == 1) {
+                 count++;
+             } else {
+                 if (count > 0) {
+                     vertical_total += count;
+                     if (count >= vmin) {
+                         vert_lengths.push_back(count);
+                         vertical_sum_valid += count;
+                         count_valid++;
+                         if (count > Vmax) Vmax = count;
+                     }
+                     count = 0;
+                 }
+             }
+         }
+         if (count > 0) {
+             vertical_total += count;
+             if (count >= vmin) {
+                 vert_lengths.push_back(count);
+                 vertical_sum_valid += count;
+                 count_valid++;
+                 if (count > Vmax) Vmax = count;
+             }
+         }
+    }
+    double laminarity = (vertical_total > 0) ? vertical_sum_valid / vertical_total : 0.0;
+    double trapping_time = (count_valid > 0) ? vertical_sum_valid / count_valid : 0.0;
+    auto result = py::array_t<int>(vert_lengths.size());
+    auto buf_res = result.request();
+    int* res_ptr = static_cast<int*>(buf_res.ptr);
+    for (size_t i = 0; i < vert_lengths.size(); i++) {
+         res_ptr[i] = vert_lengths[i];
+    }
+    return py::make_tuple(result, laminarity, trapping_time, Vmax);
+}
+
+/************************************
  * rqa_stats
  *
  * Perform full Recurrence Quantification Analysis (RQA) on a distance matrix.
  *
- * New parameters:
- *   - rqa_mode: a string ("auto" or "cross"). If "auto", the main diagonal (and optionally off-diagonals)
- *               are ignored. For "cross", no diagonals are ignored.
- *   - diag_ignore: if rqa_mode is "auto", this determines how many diagonals to ignore (1 = main diagonal only, etc.)
+ * Parameters:
+ *   - rqa_mode: "auto" or "cross". For "auto", diag_ignore is used;
+ *               for "cross", no diagonals are ignored.
+ *
+ * Additional vertical metrics (LAM, TT, Vmax) and divergence (1/Lmax) are added.
  ************************************/
 py::tuple rqa_stats(py::array_t<float> d, int rescale, float rad, int diag_ignore, int minl, std::string rqa_mode="auto") {
     int err_code = 0;
@@ -413,6 +477,7 @@ py::tuple rqa_stats(py::array_t<float> d, int rescale, float rad, int diag_ignor
     py::array lh = hist_result[0].cast<py::array>();
     py::list llmnsd = hist_result[1].cast<py::list>();
 
+    // Compute entropy from diagonal histogram
     py::list entropy;
     if (lh.request().size > 2) {
         auto buf_lh = lh.request();
@@ -455,30 +520,48 @@ py::tuple rqa_stats(py::array_t<float> d, int rescale, float rad, int diag_ignor
         }
         perc_determ = 100.0 * sum_det / recur_sum;
     }
+    
+    // Compute vertical line metrics
+    py::tuple vert_result = rqa_vertical(td, minl);
+    py::array vert_lines = vert_result[0].cast<py::array>();
+    double laminarity = vert_result[1].cast<double>();
+    double trapping_time = vert_result[2].cast<double>();
+    int Vmax = vert_result[3].cast<int>();
+
+    // Compute divergence as inverse of the maximum diagonal line length.
+    double divergence = (maxl_found > 0 ? 1.0 / maxl_found : 0.0);
 
     py::dict rs;
-    rs["rescale"]     = rescale;
-    rs["rad"]         = rad;
-    rs["diag_ignore"] = diag_ignore;
-    rs["minl"]        = minl;
-    rs["perc_recur"]  = perc_rec;
-    rs["perc_determ"] = perc_determ;
-    rs["npts"]        = npts;
-    rs["entropy"]     = entropy;
-    rs["maxl_poss"]   = maxl_poss;
-    rs["maxl_found"]  = maxl_found;
-    rs["trend1"]      = trend1;
-    rs["trend2"]      = trend2;
-    rs["llmnsd"]      = llmnsd;
+    rs["rescale"]       = rescale;
+    rs["rad"]           = rad;
+    rs["diag_ignore"]   = diag_ignore;
+    rs["minl"]          = minl;
+    rs["perc_recur"]    = perc_rec;
+    rs["perc_determ"]   = perc_determ;
+    rs["npts"]          = npts;
+    rs["entropy"]       = entropy[0].cast<double>();
+    rs["complexity"]    = entropy[1].cast<double>();
+    rs["maxl_poss"]     = maxl_poss;
+    rs["maxl_found"]    = maxl_found;
+    rs["trend_lower_diag"]     = trend1;
+    rs["trend_upper_diag"]     = trend2;
+    rs["mean_line_length"]     = llmnsd[0].cast<double>();
+    rs["std_line_length"]      = llmnsd[1].cast<double>();
+    rs["count_line"]    = llmnsd[2].cast<int>();
+    rs["laminarity"]    = laminarity;
+    rs["trapping_time"] = trapping_time;
+    rs["vmax"]          = Vmax;
+    rs["divergence"]    = divergence;
 
     py::dict mats;
-    mats["rescale"] = rescale;
-    mats["rad"]     = rad;
+    mats["rescale"]     = rescale;
+    mats["rad"]         = rad;
     mats["diag_ignore"] = diag_ignore;
-    mats["minl"]    = minl;
-    mats["td"]      = td;
-    mats["ll"]      = ll;
-    mats["lh"]      = lh;
+    mats["minl"]        = minl;
+    mats["td"]          = td;
+    mats["ll"]          = ll;
+    mats["lh"]          = lh;
+    mats["vertical"]    = vert_lines;
 
     return py::make_tuple(td, rs, mats, err_code);
 }
@@ -509,8 +592,12 @@ PYBIND11_MODULE(rqa_utils_cpp, m) {
           "Compute Shannon entropy of a distribution",
           py::arg("distr"), py::arg("nstates"));
 
+    m.def("rqa_vertical", &rqa_vertical,
+          "Compute vertical line metrics (returns vertical line lengths, laminarity, trapping time, Vmax)",
+          py::arg("thrd"), py::arg("vmin"));
+
     m.def("rqa_stats", &rqa_stats,
-          "Perform full RQA analysis on a distance matrix",
+          "Perform full RQA analysis on a distance matrix, including vertical metrics and divergence",
           py::arg("d"), py::arg("rescale"), py::arg("rad"),
           py::arg("diag_ignore"), py::arg("minl"), py::arg("rqa_mode") = "auto");
 }

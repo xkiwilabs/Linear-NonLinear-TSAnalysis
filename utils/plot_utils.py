@@ -303,7 +303,7 @@ def plot_rqa_results(dataX, dataY=None, td=None, rs=None, plot_mode='recurrence'
     # Optionally display RQA statistics
     if rs:
         plt.figtext(0.5, 0.02, f"%REC: {rs['perc_recur']:.2f} | %DET: {rs['perc_determ']:.2f} | "
-                               f"MAXLINE: {rs['maxl_found']:.0f} | MEANLINE: {rs['llmnsd'][0]:.0f} | "
+                               f"MAXLINE: {rs['maxl_found']:.0f} | MEANLINE: {rs['mean_line_length'][0]:.0f} | "
                                f"ENTROPY: {rs['entropy'][0]:.2f}",
                     ha="center", fontsize=10)
 

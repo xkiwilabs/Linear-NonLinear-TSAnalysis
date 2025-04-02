@@ -3,6 +3,7 @@ import sys
 import subprocess
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
+from setuptools import setup, Extension, find_packages
 import pybind11
 
 class BuildExt(build_ext):
@@ -33,14 +34,14 @@ setup(
     author="Mike Richardson, Cathy Macpherson",
     description="A tutorial on linear and nonlinear time series analysis, including RQA.",
     url="https://github.com/xkiwilabs/Linear-NonLinear-TSAnalysis",
-    packages=["lnl_ts_analysis", "lnl_ts_analysis.utils"],
+    packages=find_packages(),
     ext_modules=[
         Extension(
             "utils.rqa_utils_cpp",
             sources=["utils/rqa_utils.cpp"],
             include_dirs=[pybind11.get_include()],
             language="c++",
-            extra_compile_args=["-std=c++11"],
+            extra_compile_args=["-std=c++14"],
         ),
     ],
     cmdclass={"build_ext": BuildExt},
